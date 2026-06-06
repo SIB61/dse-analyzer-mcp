@@ -1,6 +1,6 @@
 # DSE Analysis MCP Server
 
-A custom [Model Context Protocol](https://modelcontextprotocol.io) server that connects Claude directly to live Dhaka Stock Exchange (DSE) data and a full technical analysis engine — running locally via Claude Code.
+A custom [Model Context Protocol](https://modelcontextprotocol.io) server that connects any MCP-compatible AI client to live Dhaka Stock Exchange (DSE) data and a full technical analysis engine. Works with Claude Code, Cursor, Windsurf, Zed, and any other client that supports MCP. Built and tested primarily with Claude.
 
 ---
 
@@ -12,9 +12,9 @@ dse-analyst-mcp/
 ├── dse_data.py             ← DSE data layer (bdshare wrapper)
 ├── technical_analysis.py   ← Indicators: RSI, MACD, BB, Ichimoku, Fib, etc.
 ├── requirements.txt        ← Python dependencies
-├── .mcp.json               ← Claude Code MCP config (auto-loaded)
+├── .mcp.json               ← Claude Code MCP config (not committed — machine-specific paths)
 ├── .venv/                  ← Python 3.11 virtual environment
-├── CLAUDE.md               ← Strategy reference (auto-loaded by Claude Code)
+├── CLAUDE.md               ← Strategy reference (auto-loaded by Claude Code; adapt for other clients)
 ├── GUIDE.md                ← User guide: queries, playbooks, indicator reference
 └── README.md               ← This file
 ```
@@ -24,15 +24,15 @@ dse-analyst-mcp/
 ## Architecture
 
 ```
-You (Claude Code)
+You (any MCP client — Claude Code, Cursor, Windsurf, etc.)
        │ natural language question
        ▼
-   Claude AI ──── reads .mcp.json ──────────────────────┐
+   AI model ──── reads client MCP config ───────────────┐
        │                                                 │
        │ picks tool                                      │
        ▼                                                 ▼
-  server.py (FastMCP)                            .mcp.json registers
-  16 registered tools                            server.py on startup
+  server.py (FastMCP)                         client config registers
+  16 registered tools                         server.py on startup
        │
        ├── DSE Data tools  → dse_data.py  → bdshare → DSE website
        └── TA tools        → technical_analysis.py → pandas/numpy
@@ -91,7 +91,7 @@ python3.11 -m venv .venv
 # 3. Verify
 .venv/bin/python3.11 -c "import server; print('OK')"
 
-# 4. Restart Claude Code — it reads .mcp.json automatically
+# 4. Configure your MCP client (see below), then restart it
 ```
 
 ### Reinstall on a new machine
@@ -101,11 +101,14 @@ git clone <this repo>
 cd dse-analyst-mcp
 python3.11 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-# Restart Claude Code
+# Configure your MCP client and restart it
 ```
 
-### MCP config (`.mcp.json`)
+### MCP config
 
+The server uses **stdio transport** — your MCP client spawns `server.py` as a subprocess. Configure it with the absolute paths to your `.venv` and `server.py`.
+
+**Claude Code** — create `.mcp.json` in the project root (not committed; gitignored):
 ```json
 {
   "mcpServers": {
@@ -117,7 +120,9 @@ python3.11 -m venv .venv
 }
 ```
 
-Claude Code spawns `server.py` as a subprocess on startup using stdio transport. No internet connection needed beyond what bdshare uses to scrape DSE.
+**Cursor / Windsurf / Zed** — add an equivalent entry in your client's MCP settings file. The `command` and `args` values are identical; only the config file location differs per client.
+
+No internet connection is needed beyond what bdshare uses to scrape DSE.
 
 ---
 
@@ -137,9 +142,10 @@ Runtime: **Python 3.11** (Homebrew). `pandas-ta` not used — all indicators are
 
 ## Troubleshooting
 
-**MCP server not appearing in Claude Code**
-→ Restart: `Cmd+Shift+P` → "Developer: Reload Window"
-→ Check `.mcp.json` uses the correct `python3.11` path
+**MCP server not appearing in your client**
+→ Claude Code: `Cmd+Shift+P` → "Developer: Reload Window"
+→ Cursor / Windsurf: restart the application
+→ Verify the `command` path in your client's MCP config points to the correct `python3.11` inside `.venv`
 
 **Empty data / "No historical data found"**
 → Try during DSE market hours: Sun–Thu, 10:00 AM – 2:30 PM BST (UTC+6)
@@ -156,4 +162,4 @@ Runtime: **Python 3.11** (Homebrew). `pandas-ta` not used — all indicators are
 ## Further Reading
 
 - [GUIDE.md](GUIDE.md) — example queries, trading style playbooks, indicator reference, risk management
-- [CLAUDE.md](CLAUDE.md) — world-famous strategies reference (auto-loaded by Claude Code)
+- [CLAUDE.md](CLAUDE.md) — world-famous strategies reference (auto-loaded by Claude Code; adapt as a system prompt or context file for other clients)

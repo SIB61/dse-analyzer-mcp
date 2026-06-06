@@ -1,6 +1,8 @@
-# DSE Analysis — Strategy Reference for Claude
+# DSE Analysis — Strategy Reference
 
 This file is automatically loaded by Claude Code every time you open this project.
+For other MCP clients (Cursor, Windsurf, Zed, etc.), paste its contents as a system prompt or context file — the strategies and tool references are fully client-agnostic.
+
 It contains the world's most famous trading strategies, scoring frameworks, and how to apply each using the DSE MCP tools available in this session.
 
 ---

@@ -1,6 +1,6 @@
 # DSE Analysis — Complete User Guide
 
-Your complete reference for using the DSE MCP server with Claude. Covers example queries, how to read results, trading strategy playbooks, indicator explanations, and advanced workflows.
+Your complete reference for using the DSE MCP server with any MCP-compatible AI client (Claude, Cursor, Windsurf, etc.). Covers example queries, how to read results, trading strategy playbooks, indicator explanations, and advanced workflows. Examples are written for Claude but the queries work identically on any client.
 
 ---
 
