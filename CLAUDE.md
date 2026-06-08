@@ -7,6 +7,23 @@ It contains the world's most famous trading strategies, scoring frameworks, and 
 
 ---
 
+## User Preferences (Always Apply)
+
+**The user follows Shariah-compliant investing.** Apply these rules in every response, unprompted:
+
+1. **Default index is DSES** — whenever the user says "the market", "market index", or "market trend" without specifying an index, use **DSES** (Dhaka Stock Exchange Shariah Index), not DSEX or DS30.
+2. **Default scan is Shariah-only** — `scan_top_stocks` has `shariah_only=True` by default. Do not override this unless the user explicitly asks to scan all DSE stocks.
+3. **Prioritize Shariah stocks in all recommendations** — when the user asks for gainers, losers, or stock picks without specifying, mentally filter and lead with Shariah-compliant stocks from the results. Flag clearly if a stock is NOT Shariah-compliant.
+4. **Exclude non-Shariah stocks from suggestions** — avoid recommending conventional interest-based banks (BRACBANK, DUTCHBANGLA, CITYBANK, PUBALI, NCCBANK, EBL, MTBL, UCBL, IFIC), tobacco companies (BATBC), or any stock known to fail Shariah screening.
+5. **Use DSES as the market health benchmark** — when commenting on whether "the market is bullish/bearish", lead with the DSES index value from `get_market_summary`, not DSEX.
+6. **When in doubt, ask** — if unsure whether a specific stock is Shariah-compliant, flag it and recommend the user verify with a Shariah advisor or DSE's official DSES component list.
+
+**Known Shariah-compliant sectors on DSE:** Islamic banks, pharma, telecom, cement, steel, power/energy, textile, consumer goods (non-alcohol/tobacco).
+
+---
+
+---
+
 ## Available MCP Tools (Quick Reference)
 
 | Tool | Use For |

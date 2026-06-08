@@ -1,4 +1,4 @@
-"""DSE Analysis MCP Server — exposes DSE data and technical analysis tools to Claude."""
+"""DSE Analysis MCP Server — exposes DSE data and technical analysis tools via MCP."""
 import json
 from datetime import datetime, timedelta
 
@@ -272,30 +272,55 @@ def full_analysis(symbol: str, days: int = 365) -> str:
 
 
 @mcp.tool()
-def scan_top_stocks(trading_style: str = "all", top_n: int = 20) -> str:
+def scan_top_stocks(trading_style: str = "all", top_n: int = 20, shariah_only: bool = True) -> str:
     """
-    Scan and score the most actively traded DSE stocks using world-famous strategies.
+    Scan and score DSE stocks using world-famous strategies.
     Returns a ranked list of BUY/WATCH/AVOID candidates with strategy scores.
 
     This tool:
-      1. Fetches all live prices and picks the top_n most active stocks by volume
-      2. Downloads 90 days of OHLCV data for each
-      3. Scores them across 5 strategies: momentum, swing, long_term, breakout, mean_reversion
-      4. Returns them ranked by score for the requested trading style
+      1. Fetches live prices and picks the most active stocks by volume
+      2. If shariah_only=True (default), filters to DSES Shariah-compliant stocks only
+      3. Downloads 90 days of OHLCV data for each
+      4. Scores them across 5 strategies: momentum, swing, long_term, breakout, mean_reversion
+      5. Returns them ranked by score for the requested trading style
 
     Args:
         trading_style: "momentum", "swing", "long_term", "breakout", "mean_reversion", or "all"
                        (default "all" ranks by best overall score across strategies)
-        top_n: How many of the most active stocks to scan (default 20, max 50)
+        top_n: How many stocks to scan (default 20, max 50)
+        shariah_only: If True (default), scan only DSES Shariah-compliant stocks.
+                      Set False to scan all DSE stocks regardless of Shariah compliance.
     """
-    # Most liquid/active DSE stocks — used as fallback when market is closed
-    _LIQUID_STOCKS = [
+    # Shariah-compliant stocks listed on the DSES index
+    _SHARIAH_STOCKS = [
+        # Islamic Banks
+        "ISLAMIBANK", "EXIM", "ALARABANK", "SHAHJALAL", "UNIONBANK",
+        # Pharma & Healthcare
+        "SQURPHARMA", "RENATA", "ORIONPHAR", "IBNSINA", "ACIPHARM", "BEACONPHAR",
+        # Telecom
+        "GRAMEENPHONE", "ROBI",
+        # Consumer Goods (non-tobacco/alcohol)
+        "MARICO", "OLYMPIC", "SINGERBD", "RECKITTBEN",
+        # Cement
+        "PREMIERCEM", "HEIDELBCEM", "LAFSURCEML", "CONFIDCEM",
+        # Steel / Engineering
+        "BSRMSTEEL", "BSRMLTD", "GPHISPAT",
+        # Power / Energy / Gas
+        "KPCL", "SUMITPOWER", "POWERGRID", "DESCO", "TITASGAS", "UPGDCL",
+        # Textile
+        "SQUARETEX", "APEXFOOT",
+        # Diversified / Others
+        "ACI", "BERGER", "AFTABAUTO",
+    ]
+
+    # All liquid DSE stocks (Shariah and non-Shariah) — fallback when market is closed
+    _ALL_LIQUID_STOCKS = [
         "BRACBANK", "GRAMEENPHONE", "BATBC", "SQURPHARMA", "DUTCHBANGLA",
         "RENATA", "ISLAMIBANK", "OLYMPIC", "CITYBANK", "BERGER",
         "BSRMSTEEL", "MARICO", "NCCBANK", "PUBALI", "UCBL",
         "LHBL", "TITASGAS", "POWERGRID", "UPGDCL", "DESCO",
         "BDFINANCE", "DBH", "IFIC", "EBL", "MTBL",
-        "BERGERPBL", "KPCL", "SUMITPOWER", "BXPHARMA", "LAFSURCEML",
+        "KPCL", "SUMITPOWER", "BXPHARMA", "LAFSURCEML",
         "GPHISPAT", "BSRMLTD", "PREMIERCEM", "HEIDELBCEM", "SINGERBD",
         "RECKITTBEN", "APEXFOOT", "SQUARETEX", "BEXIMCO", "AFTABAUTO",
     ]
@@ -306,29 +331,33 @@ def scan_top_stocks(trading_style: str = "all", top_n: int = 20) -> str:
     if style not in valid_styles:
         return _json({"error": f"Invalid style. Choose from: {valid_styles}"})
 
+    shariah_set = set(_SHARIAH_STOCKS)
+
     # Try live prices first (works during market hours)
     all_prices = dse.get_all_live_prices()
     market_open = bool(all_prices and not (len(all_prices) == 1 and "error" in all_prices[0]))
 
     if market_open:
+        candidates = [s for s in all_prices if s.get("volume") and s.get("symbol")]
+        if shariah_only:
+            candidates = [s for s in candidates if s.get("symbol", "").strip().upper() in shariah_set]
         active_symbols = [
             {"symbol": s.get("symbol", "").strip(),
              "last_price": s.get("last_price"),
              "change": s.get("change"),
              "volume": s.get("volume")}
-            for s in sorted(
-                [s for s in all_prices if s.get("volume") and s.get("symbol")],
-                key=lambda x: x.get("volume", 0), reverse=True,
-            )[:top_n]
+            for s in sorted(candidates, key=lambda x: x.get("volume", 0), reverse=True)[:top_n]
         ]
-        data_source = "live"
+        data_source = "live" + (" — Shariah (DSES) stocks only" if shariah_only else " — all DSE stocks")
     else:
-        # Market closed — use historical data on known liquid stocks
+        # Market closed — use known stock lists
+        fallback = _SHARIAH_STOCKS if shariah_only else _ALL_LIQUID_STOCKS
         active_symbols = [
             {"symbol": sym, "last_price": None, "change": None, "volume": None}
-            for sym in _LIQUID_STOCKS[:top_n]
+            for sym in fallback[:top_n]
         ]
-        data_source = "historical (market closed — based on last trading session)"
+        label = "Shariah (DSES)" if shariah_only else "all DSE"
+        data_source = f"historical (market closed — {label} stocks, last trading session)"
 
     results = []
     errors = []
@@ -406,6 +435,7 @@ def scan_top_stocks(trading_style: str = "all", top_n: int = 20) -> str:
 
     return _json({
         "scan_style": style,
+        "shariah_only": shariah_only,
         "data_source": data_source,
         "stocks_scanned": len(results),
         "sort_by": sort_key,
