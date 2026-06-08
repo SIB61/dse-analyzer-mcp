@@ -180,6 +180,36 @@ def get_company_info(symbol: str) -> dict:
         return {"error": str(e), "symbol": symbol}
 
 
+def get_historical_data_with_live(symbol: str, start_date: str, end_date: str) -> pd.DataFrame:
+    """Historical OHLCV merged with today's live candle (if market is open)."""
+    df = get_historical_data(symbol, start_date, end_date)
+
+    try:
+        live = get_live_price(symbol)
+        if "error" in live or live.get("last_price") is None:
+            return df
+
+        today = pd.Timestamp(datetime.today().date())
+
+        # Skip if today's session is already in the archive
+        if not df.empty and today in df.index:
+            return df
+
+        row = {
+            "open":   live.get("open")   or live.get("last_price"),
+            "high":   live.get("high")   or live.get("last_price"),
+            "low":    live.get("low")    or live.get("last_price"),
+            "close":  live.get("last_price"),
+            "volume": live.get("volume") or 0,
+        }
+        today_df = pd.DataFrame([row], index=[today])
+        df = pd.concat([df, today_df]).sort_index()
+    except Exception:
+        pass  # live fetch failed — return archive data as-is
+
+    return df
+
+
 def default_date_range(days: int = 365) -> tuple[str, str]:
     end = datetime.today()
     start = end - timedelta(days=days)

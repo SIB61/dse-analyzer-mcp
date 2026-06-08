@@ -17,9 +17,9 @@ def _json(obj) -> str:
 
 
 def _load_history(symbol: str, days: int = 365) -> tuple:
-    """Returns (df, error_str)."""
+    """Returns (df, error_str). Historical archive + today's live candle merged."""
     start, end = dse.default_date_range(days)
-    df = dse.get_historical_data(symbol, start, end)
+    df = dse.get_historical_data_with_live(symbol, start, end)
     if df.empty:
         return None, f"No historical data found for {symbol} in the last {days} days."
     return df, None
