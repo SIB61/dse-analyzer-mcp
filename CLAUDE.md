@@ -22,6 +22,14 @@ It contains the world's most famous trading strategies, scoring frameworks, and 
 
 ---
 
+## Portfolio Reference
+
+See `portfolio.md` for the user's current holdings and watchlist with DSE tickers.
+
+- When user says "analyze my holdings" or "scan my portfolio" → read `portfolio.md` and iterate through the Holdings table
+- When user says "scan my watchlist" or "check watchlist" → read `portfolio.md` and iterate through the Watchlist table
+- When user says "analyze [stock name]" — use the DSE ticker from `portfolio.md` if the stock is listed there
+
 ---
 
 ## Available MCP Tools (Quick Reference)
