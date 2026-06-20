@@ -601,6 +601,128 @@ def full_analysis(df: pd.DataFrame, symbol: str = "") -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Candlestick Pattern — Engulfing
+# ---------------------------------------------------------------------------
+
+def detect_engulfing(df: pd.DataFrame, lookback: int = 5) -> dict:
+    """
+    Detect bullish and bearish engulfing candlestick patterns in the last `lookback` candles.
+    Returns the most recent engulfing event found, plus strength metrics.
+    """
+    if df is None or len(df) < max(lookback + 1, 30):
+        return {"pattern": "NONE", "reason": "Insufficient data"}
+
+    window = df.tail(lookback + 1).copy()
+    close = window["close"]
+    open_ = window["open"]
+    high  = window["high"]
+    low   = window["low"]
+    volume = window["volume"]
+
+    rsi_series = _rsi_manual(close, 14) if len(df) >= 14 else pd.Series([50] * len(window), index=window.index)
+    vol_ma20 = df["volume"].rolling(20).mean()
+
+    latest_engulfing = None
+
+    # Scan from most recent backwards so we return the freshest signal
+    candles = list(range(1, len(window)))  # index of current candle (prev = idx-1)
+    for i in reversed(candles):
+        prev_open  = float(open_.iloc[i - 1])
+        prev_close = float(close.iloc[i - 1])
+        curr_open  = float(open_.iloc[i])
+        curr_close = float(close.iloc[i])
+        curr_vol   = float(volume.iloc[i])
+
+        prev_body = abs(prev_close - prev_open)
+        curr_body = abs(curr_close - curr_open)
+        if prev_body < 1e-9 or curr_body < 1e-9:
+            continue
+
+        body_ratio = round(curr_body / prev_body, 2)
+
+        # Volume context
+        vol_ma_val = float(vol_ma20.iloc[-(lookback + 1 - i + 1)])
+        vol_ratio  = round(curr_vol / vol_ma_val, 2) if vol_ma_val > 0 else 1.0
+        vol_confirmed = vol_ratio >= 1.2
+
+        # RSI at the current bar
+        rsi_val = float(rsi_series.iloc[-(lookback + 1 - i)])
+
+        # Shadow analysis — wicks relative to body
+        curr_high = float(high.iloc[i])
+        curr_low  = float(low.iloc[i])
+
+        # --- Bullish Engulfing ---
+        # Previous candle bearish, current candle bullish and body fully engulfs previous body
+        if (prev_close < prev_open and          # prev bearish
+                curr_close > curr_open and       # curr bullish
+                curr_open  <= prev_close and     # curr opens at or below prev close
+                curr_close >= prev_open):        # curr closes at or above prev open
+
+            strength = "STRONG" if (body_ratio >= 1.5 and vol_confirmed) else \
+                       "MODERATE" if (body_ratio >= 1.2 or vol_confirmed) else "WEAK"
+
+            latest_engulfing = {
+                "pattern":       "BULLISH ENGULFING",
+                "candle_index":  f"-{lookback + 1 - i} sessions ago" if i < len(window) - 1 else "latest session",
+                "signal":        "BUY",
+                "strength":      strength,
+                "body_ratio":    body_ratio,
+                "prev_candle":   {"open": round(prev_open, 2), "close": round(prev_close, 2), "type": "bearish"},
+                "curr_candle":   {"open": round(curr_open, 2), "close": round(curr_close, 2), "high": round(curr_high, 2), "low": round(curr_low, 2), "type": "bullish"},
+                "volume_ratio":  vol_ratio,
+                "volume_confirmed": vol_confirmed,
+                "rsi_at_signal": round(rsi_val, 1),
+                "rsi_context":   ("Oversold zone — high-conviction buy" if rsi_val < 40
+                                  else "Neutral zone — moderate signal" if rsi_val < 55
+                                  else "Overbought zone — weaker signal"),
+                "interpretation": (
+                    f"Bullish body ({body_ratio}x larger) swallowed the prior bearish candle. "
+                    f"{'Volume spike confirms buyer conviction. ' if vol_confirmed else 'Volume not confirming — wait for follow-through. '}"
+                    f"RSI {round(rsi_val, 1)} — {('great entry zone' if rsi_val < 50 else 'already extended')}."
+                ),
+            }
+            break
+
+        # --- Bearish Engulfing ---
+        # Previous candle bullish, current candle bearish and body fully engulfs previous body
+        if (prev_close > prev_open and          # prev bullish
+                curr_close < curr_open and       # curr bearish
+                curr_open  >= prev_close and     # curr opens at or above prev close
+                curr_close <= prev_open):        # curr closes at or below prev open
+
+            strength = "STRONG" if (body_ratio >= 1.5 and vol_confirmed) else \
+                       "MODERATE" if (body_ratio >= 1.2 or vol_confirmed) else "WEAK"
+
+            latest_engulfing = {
+                "pattern":       "BEARISH ENGULFING",
+                "candle_index":  f"-{lookback + 1 - i} sessions ago" if i < len(window) - 1 else "latest session",
+                "signal":        "SELL",
+                "strength":      strength,
+                "body_ratio":    body_ratio,
+                "prev_candle":   {"open": round(prev_open, 2), "close": round(prev_close, 2), "type": "bullish"},
+                "curr_candle":   {"open": round(curr_open, 2), "close": round(curr_close, 2), "high": round(curr_high, 2), "low": round(curr_low, 2), "type": "bearish"},
+                "volume_ratio":  vol_ratio,
+                "volume_confirmed": vol_confirmed,
+                "rsi_at_signal": round(rsi_val, 1),
+                "rsi_context":   ("Overbought zone — high-conviction sell" if rsi_val > 60
+                                  else "Neutral zone — moderate signal" if rsi_val > 45
+                                  else "Oversold zone — weaker signal"),
+                "interpretation": (
+                    f"Bearish body ({body_ratio}x larger) swallowed the prior bullish candle. "
+                    f"{'Volume spike confirms seller conviction. ' if vol_confirmed else 'Volume not confirming — caution. '}"
+                    f"RSI {round(rsi_val, 1)} — {('strong reversal zone' if rsi_val > 60 else 'not yet extended')}."
+                ),
+            }
+            break
+
+    if latest_engulfing is None:
+        return {"pattern": "NONE", "reason": f"No engulfing pattern found in last {lookback} candles"}
+
+    return latest_engulfing
+
+
+# ---------------------------------------------------------------------------
 # Strategy Scorer (used by market scanner)
 # ---------------------------------------------------------------------------
 

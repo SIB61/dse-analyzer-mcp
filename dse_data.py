@@ -3,6 +3,17 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
+# dsebd.org renewed its cert on 2026-06-09 with "Sectigo Public Server
+# Authentication CA DV R36" — not yet in certifi (released 2026-05-20).
+# Disable SSL verification on the shared bdshare session so requests succeed.
+try:
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    import bdshare.util.helper as _bdshare_helper
+    _bdshare_helper._session.verify = False
+except Exception:
+    pass
+
 
 def _safe_float(val):
     try:

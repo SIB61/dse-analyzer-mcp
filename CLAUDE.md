@@ -51,8 +51,12 @@ See `portfolio.md` for the user's current holdings and watchlist with DSE ticker
 | `get_pivot_points(symbol)` | S/R pivot levels |
 | `full_analysis(symbol)` | All indicators + BUY/SELL verdict |
 | `scan_top_stocks(style, top_n)` | Market scanner — ranked buy/sell list |
+| `get_engulfing_pattern(symbol)` | Detect bullish/bearish engulfing on one stock |
+| `scan_engulfing_stocks(pattern, lookback)` | Scan all Shariah stocks for engulfing patterns |
 
 **`scan_top_stocks` styles:** `"momentum"` `"swing"` `"long_term"` `"breakout"` `"mean_reversion"` `"all"`
+
+**`scan_engulfing_stocks` pattern:** `"bullish"` `"bearish"` `"both"` — strength: `STRONG` (big body + volume spike) / `MODERATE` / `WEAK`
 
 ---
 

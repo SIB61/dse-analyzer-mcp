@@ -10,7 +10,7 @@
 | Olympic | OLYMPIC |
 | Techno Drugs | TECHNODRUG |
 | KBPPWBIL | KBPPWBIL |
-| DSSL | DSSL |
+| Dragon Sweater And Spinning Limited | DSSL |
 | FEKDIL | FEKDIL |
 
 ## Watchlist
