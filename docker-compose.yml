@@ -6,12 +6,12 @@ services:
     build: .
     container_name: dse-mcp
     ports:
-      - "8000:8000"
+      - "7000:8000"
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      test: ["CMD", ".venv/bin/python", "-c", "import requests; requests.get('http://localhost:8000')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -31,18 +31,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-  # Optional: Nginx reverse proxy for HTTPS
-  # Uncomment to add SSL/TLS and better security
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: dse-mcp-nginx
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx-dse-mcp.conf:/etc/nginx/conf.d/default.conf:ro
-  #     - /etc/letsencrypt:/etc/letsencrypt:ro  # SSL certs from host
-  #   depends_on:
-  #     - dse-mcp
-  #   restart: unless-stopped

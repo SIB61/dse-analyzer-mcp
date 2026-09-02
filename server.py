@@ -1,8 +1,18 @@
-"""DSE Analysis MCP Server — exposes DSE data and technical analysis tools via MCP."""
+#!/usr/bin/env python3
+"""
+DSE Analysis MCP Server — HTTP + Stdio transport.
+
+Run with:
+  python3 server.py --transport http --host 0.0.0.0 --port 8000
+  python3 server.py --transport stdio  (for local clients)
+"""
 import json
-from datetime import datetime, timedelta
+import argparse
 
 from mcp.server.fastmcp import FastMCP
+import uvicorn
+from starlette.routing import Route
+from starlette.responses import JSONResponse
 
 import dse_data as dse
 import technical_analysis as ta_lib
@@ -10,6 +20,9 @@ import technical_analysis as ta_lib
 mcp = FastMCP("DSE Analysis")
 
 _PROJECT_DIR = __import__("os").path.dirname(__import__("os").path.abspath(__file__))
+
+# Store the app reference for later route addition
+_app_instance = None
 
 # ---------------------------------------------------------------------------
 # Shariah-compliant DSE stocks — merged from two official sources:
@@ -661,5 +674,57 @@ def scan_engulfing_stocks(
     })
 
 
+def main():
+    parser = argparse.ArgumentParser(description="DSE Analysis MCP Server")
+    parser.add_argument(
+        "--transport",
+        choices=["http", "stdio"],
+        default="stdio",
+        help="Transport mode (http for remote, stdio for local clients)",
+    )
+    parser.add_argument(
+        "--host",
+        default="0.0.0.0",
+        help="Host to bind to (HTTP mode only)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to listen on (HTTP mode only)",
+    )
+    
+    args = parser.parse_args()
+    
+    if args.transport == "http":
+        print(f"Starting DSE Analysis MCP Server on http://{args.host}:{args.port}")
+        print(f"Connect clients to: http://{args.host}:{args.port}")
+        print(f"Documentation available at: http://{args.host}:{args.port}/docs")
+        app = mcp.streamable_http_app()
+        
+        # Add health check endpoint using Starlette routing
+        async def health_check(request):
+            return JSONResponse({
+                "status": "ok",
+                "service": "DSE Analysis MCP Server",
+                "version": "1.0",
+                "docs": "/docs",
+                "openapi": "/openapi.json"
+            })
+        
+        # Add the route to the app
+        app.routes.append(Route("/", health_check, methods=["GET"]))
+        
+        uvicorn.run(
+            app,
+            host=args.host,
+            port=args.port,
+            log_level="info",
+        )
+    else:
+        # Stdio mode (default)
+        mcp.run()
+
+
 if __name__ == "__main__":
-    mcp.run()
+    main()
