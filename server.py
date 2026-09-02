@@ -3,7 +3,7 @@
 DSE Analysis MCP Server — HTTP + Stdio transport.
 
 Run with:
-  python3 server.py --transport http --host 0.0.0.0 --port 8000
+  python3 server.py --transport http --host 0.0.0.0 --port 8765
   python3 server.py --transport stdio  (for local clients)
 """
 import json
@@ -690,7 +690,7 @@ def main():
     parser.add_argument(
         "--port",
         type=int,
-        default=8000,
+        default=8765,
         help="Port to listen on (HTTP mode only)",
     )
     
