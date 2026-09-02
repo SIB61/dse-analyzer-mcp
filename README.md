@@ -31,9 +31,9 @@ docker exec -it dse-mcp opencode
 ### Option 2: Docker (Manual)
 
 ```bash
-docker pull ghcr.io/sib61/dse-analyzer:main
+docker pull ghcr.io/sib61/dse-analyzer-mcp:main
 
-docker run -d -p 8765:8765 --name dse-mcp ghcr.io/sib61/dse-analyzer:main
+docker run -d -p 8765:8765 --name dse-mcp ghcr.io/sib61/dse-analyzer-mcp:main
 ```
 
 ### Option 3: Docker Compose
@@ -83,7 +83,7 @@ Add to your MCP client config (e.g. Claude Desktop):
 ```json
 {
   "mcpServers": {
-    "dse-analyzer": {
+    "dse-analyzer-mcp": {
       "url": "http://localhost:8765/mcp"
     }
   }

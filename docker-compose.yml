@@ -2,16 +2,16 @@ version: '3.8'
 
 services:
   # DSE Analysis MCP Server
-  dse-mcp:
-    image: ghcr.io/sib61/dse-analyzer:main
-    container_name: dse-mcp
+  dse-analyzer-mcp:
+    image: ghcr.io/sib61/dse-analyzer-mcp:main
+    container_name: dse-analyzer-mcp
     ports:
       - "8765:8765"
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
-      - dse-analyzer:/app/mcp-configs
-      - dse-analyzer-opencode:/root/.config/opencode
+      - dse-analyzer-mcp:/app/mcp-configs
+      - dse-analyzer-mcp-opencode:/root/.config/opencode
     restart: unless-stopped
     healthcheck:
       test: ["CMD", ".venv/bin/python", "-c", "import requests; requests.get('http://localhost:8765')"]
@@ -34,5 +34,5 @@ services:
         max-file: "3"
 
 volumes:
-  dse-analyzer:
-  dse-analyzer-opencode:
+  dse-analyzer-mcp:
+  dse-analyzer-mcp-opencode:

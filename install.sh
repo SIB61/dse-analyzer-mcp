@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE="ghcr.io/sib61/dse-analyzer:main"
+IMAGE="ghcr.io/sib61/dse-analyzer-mcp:main"
 CONTAINER="dse-mcp"
-VOLUME="dse-analyzer"
+VOLUME="dse-analyzer-mcp"
 
 echo "==> Pulling $IMAGE ..."
 docker pull "$IMAGE"
@@ -17,7 +17,7 @@ docker run -d \
   --name "$CONTAINER" \
   -p 8765:8765 \
   -v "$VOLUME":/app/mcp-configs \
-  -v dse-analyzer-opencode:/root/.config/opencode \
+  -v dse-analyzer-mcp-opencode:/root/.config/opencode \
   --restart unless-stopped \
   "$IMAGE"
 
