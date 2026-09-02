@@ -12,9 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   git \
   && rm -rf /var/lib/apt/lists/*
 
-# Install opencode
-RUN curl -fsSL https://opencode.ai/install | bash
-
 # Copy project files needed for uv sync
 COPY pyproject.toml uv.lock README.md ./
 
@@ -27,10 +24,7 @@ COPY dse_data.py .
 COPY technical_analysis.py .
 
 # Copy MCP configs
-COPY mcp-configs/ /root/mcp-configs/
-
-# Set up opencode config directory
-RUN mkdir -p /root/.config/opencode
+COPY mcp-configs/* /root/mcp-configs/*
 
 # Expose port
 EXPOSE 8765

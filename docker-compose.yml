@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # DSE Analysis MCP Server
   dse-analyzer-mcp:
