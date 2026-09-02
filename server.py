@@ -693,7 +693,19 @@ def main():
         default=8765,
         help="Port to listen on (HTTP mode only)",
     )
-    
+    parser.add_argument(
+        "--proxy-headers",
+        action="store_true",
+        default=True,
+        help="Enable proxy header trust (default: True)",
+    )
+    parser.add_argument(
+        "--no-proxy-headers",
+        action="store_true",
+        default=False,
+        help="Disable proxy header trust",
+    )
+
     args = parser.parse_args()
     
     if args.transport == "http":
@@ -735,6 +747,8 @@ def main():
             host=args.host,
             port=args.port,
             log_level="info",
+            proxy_headers=not args.no_proxy_headers,
+            forwarded_allow_ips="*",
         )
     else:
         # Stdio mode (default)
