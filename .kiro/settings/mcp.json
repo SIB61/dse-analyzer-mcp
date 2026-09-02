@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "DSE-ANALYZER": {
-      "url": "http://localhost:7000/mcp"
+      "url": "http://localhost:8765/mcp"
     }
   }
 }
