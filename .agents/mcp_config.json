@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "dse": {
+      "serverUrl": "http://localhost:7000/mcp"
+    }
+  }
+}
