@@ -22,9 +22,7 @@ RUN uv sync --frozen --no-install-project
 COPY server.py .
 COPY dse_data.py .
 COPY technical_analysis.py .
-
-# Copy MCP configs
-COPY mcp-configs/* /root/mcp-configs/*
+COPY mcp-configs/ ./mcp-configs/
 
 # Expose port
 EXPOSE 8765
