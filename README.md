@@ -19,7 +19,7 @@ An MCP (Model Context Protocol) server that provides **live Dhaka Stock Exchange
 No clone required. Pulls the image, starts the server, and sets up opencode:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SIB61/dse-analyst-mcp/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SIB61/dse-analyzer-mcp/main/install.sh | bash
 ```
 
 Then open opencode inside the container:
@@ -39,16 +39,16 @@ docker run -d -p 8765:8765 --name dse-mcp ghcr.io/sib61/dse-analyzer:main
 ### Option 3: Docker Compose
 
 ```bash
-git clone https://github.com/SIB61/dse-analyst-mcp.git
-cd dse-analyst-mcp
+git clone https://github.com/SIB61/dse-analyzer-mcp.git
+cd dse-analyzer-mcp
 docker compose up -d
 ```
 
 ### Option 4: Local Setup (Python 3.12+)
 
 ```bash
-git clone https://github.com/SIB61/dse-analyst-mcp.git
-cd dse-analyst-mcp
+git clone https://github.com/SIB61/dse-analyzer-mcp.git
+cd dse-analyzer-mcp
 
 # Install uv (if not installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
