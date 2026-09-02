@@ -712,8 +712,23 @@ def main():
                 "openapi": "/openapi.json"
             })
         
-        # Add the route to the app
+        # Add OAuth protected resource metadata endpoint (RFC 9728 compliance)
+        # This endpoint must return the correct resource URL that matches the MCP server endpoint
+        async def oauth_protected_resource_metadata(request):
+            # Get the scheme and host from the request
+            scheme = request.url.scheme
+            host = request.url.netloc
+            # Return metadata with resource pointing to the MCP endpoint
+            return JSONResponse({
+                "resource": f"{scheme}://{host}/mcp",
+                "authorization_servers": [],
+                "scopes_supported": [],
+                "bearer_methods_supported": ["header"]
+            })
+        
+        # Add the routes to the app
         app.routes.append(Route("/", health_check, methods=["GET"]))
+        app.routes.append(Route("/.well-known/oauth-protected-resource", oauth_protected_resource_metadata, methods=["GET"]))
         
         uvicorn.run(
             app,
