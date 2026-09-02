@@ -5,13 +5,13 @@ services:
   dse-analyzer-mcp:
     image: ghcr.io/sib61/dse-analyzer-mcp:main
     container_name: dse-analyzer-mcp
+    platform: linux/${DOCKER_ARCH:-amd64}
     ports:
       - "8765:8765"
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
       - dse-analyzer-mcp:/app/mcp-configs
-      - dse-analyzer-mcp-opencode:/root/.config/opencode
     restart: unless-stopped
     healthcheck:
       test: ["CMD", ".venv/bin/python", "-c", "import requests; requests.get('http://localhost:8765')"]
@@ -35,4 +35,3 @@ services:
 
 volumes:
   dse-analyzer-mcp:
-  dse-analyzer-mcp-opencode:

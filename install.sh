@@ -5,19 +5,23 @@ IMAGE="ghcr.io/sib61/dse-analyzer-mcp:main"
 CONTAINER="dse-analyzer-mcp"
 VOLUME="dse-analyzer-mcp"
 
-echo "==> Pulling $IMAGE ..."
-docker pull "$IMAGE"
+ARCH=$(uname -m)
+case "$ARCH" in
+  x86_64)  PLATFORM="linux/amd64" ;;
+  aarch64|arm64) PLATFORM="linux/arm64" ;;
+  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+esac
 
-echo "==> Creating volume $VOLUME (if not exists) ..."
-docker volume create "$VOLUME" >/dev/null 2>&1 || true
+echo "==> Pulling $IMAGE ($PLATFORM) ..."
+docker pull --platform "$PLATFORM" "$IMAGE"
 
 echo "==> Starting $CONTAINER ..."
 docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 docker run -d \
   --name "$CONTAINER" \
+  --platform "$PLATFORM" \
   -p 8765:8765 \
   -v "$VOLUME":/app/mcp-configs \
-  -v dse-analyzer-mcp-opencode:/root/.config/opencode \
   --restart unless-stopped \
   "$IMAGE"
 
@@ -30,14 +34,6 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
-echo "==> Copying MCP configs into container ..."
-docker cp mcp-configs/. "$CONTAINER":/app/mcp-configs/
-
-echo "==> Setting up opencode config ..."
-docker exec "$CONTAINER" bash -c 'mkdir -p /root/.config/opencode && cp /app/mcp-configs/opencode.json /root/.config/opencode/opencode.json'
-
 echo ""
 echo "Done! Server running at http://localhost:8765"
 echo ""
-echo "To open opencode inside the container:"
-echo "  docker exec -it $CONTAINER opencode"
