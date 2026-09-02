@@ -3,7 +3,7 @@ set -euo pipefail
 
 IMAGE="ghcr.io/sib61/dse-analyzer-mcp:main"
 CONTAINER="dse-analyzer-mcp"
-VOLUME="dse-analyzer-mcp"
+WORKSPACE="$HOME/.dse-analyzer-mcp"
 
 ARCH=$(uname -m)
 case "$ARCH" in
@@ -15,13 +15,16 @@ esac
 echo "==> Pulling $IMAGE ($PLATFORM) ..."
 docker pull --platform "$PLATFORM" "$IMAGE"
 
+echo "==> Setting up workspace at $WORKSPACE ..."
+mkdir -p "$WORKSPACE"
+
 echo "==> Starting $CONTAINER ..."
 docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 docker run -d \
   --name "$CONTAINER" \
   --platform "$PLATFORM" \
   -p 8765:8765 \
-  -v "$VOLUME":/app/mcp-configs \
+  -v "$WORKSPACE":/app/mcp-configs \
   --restart unless-stopped \
   "$IMAGE"
 
@@ -36,4 +39,6 @@ done
 
 echo ""
 echo "Done! Server running at http://localhost:8765"
+echo ""
+echo "Workspace: $WORKSPACE"
 echo ""

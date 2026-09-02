@@ -9,7 +9,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
-      - dse-analyzer-mcp:/app/mcp-configs
+      - ~/.dse-analyzer-mcp:/app/mcp-configs
     restart: unless-stopped
     healthcheck:
       test: ["CMD", ".venv/bin/python", "-c", "import requests; requests.get('http://localhost:8765')"]
@@ -30,6 +30,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-volumes:
-  dse-analyzer-mcp:
