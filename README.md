@@ -1,6 +1,6 @@
-# DSE Analyst MCP Server
+# DSE Analyzer MCP Server
 
-An MCP (Model Context Protocol) server that provides **live Dhaka Stock Exchange (DSE) data** and a **comprehensive technical analysis engine**. Connect it to any MCP-compatible AI client (Claude, Cursor, Windsurf, etc.) to analyze DSE stocks with world-famous trading strategies.
+An MCP (Model Context Protocol) server that provides **live Dhaka Stock Exchange (DSE) data** and a **comprehensive technical analysis engine**. Connect it to any MCP-compatible AI client (Claude, Cursor, Windsurf, opencode, etc.) to analyze DSE stocks with world-famous trading strategies.
 
 ## Features
 
@@ -16,16 +16,17 @@ An MCP (Model Context Protocol) server that provides **live Dhaka Stock Exchange
 
 ### Option 1: One-liner Install (Recommended)
 
-No clone required. Pulls the image, starts the server, and sets up opencode:
+No clone required. Pulls the image, starts the server, and sets up a local workspace:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SIB61/dse-analyzer-mcp/main/install.sh | bash
 ```
 
-Then open opencode inside the container:
+Then open your AI agent in the workspace:
 
 ```bash
-docker exec -it dse-analyzer-mcp opencode
+cd ~/.dse-analyzer-mcp
+opencode
 ```
 
 ### Option 2: Docker (Manual)
@@ -33,7 +34,10 @@ docker exec -it dse-analyzer-mcp opencode
 ```bash
 docker pull ghcr.io/sib61/dse-analyzer-mcp:main
 
-docker run -d -p 8765:8765 --name dse-analyzer-mcp ghcr.io/sib61/dse-analyzer-mcp:main
+docker run -d -p 8765:8765 \
+  -v ~/.dse-analyzer-mcp:/app/mcp-configs \
+  --name dse-analyzer-mcp \
+  ghcr.io/sib61/dse-analyzer-mcp:main
 ```
 
 ### Option 3: Docker Compose
@@ -78,7 +82,7 @@ python server.py --transport stdio
 
 ### MCP Client Configuration
 
-Add to your MCP client config (e.g. Claude Desktop):
+Add to your MCP client config (e.g. Claude Desktop, opencode):
 
 ```json
 {
