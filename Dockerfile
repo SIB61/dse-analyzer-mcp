@@ -5,10 +5,15 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (if needed for bdshare)
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
   build-essential \
+  curl \
+  git \
   && rm -rf /var/lib/apt/lists/*
+
+# Install opencode
+RUN curl -fsSL https://opencode.ai/install | bash
 
 # Copy project files needed for uv sync
 COPY pyproject.toml uv.lock README.md ./
@@ -21,6 +26,12 @@ COPY server.py .
 COPY dse_data.py .
 COPY technical_analysis.py .
 
+# Copy MCP configs
+COPY mcp-configs/ /root/mcp-configs/
+
+# Set up opencode config directory
+RUN mkdir -p /root/.config/opencode
+
 # Expose port
 EXPOSE 8765
 
@@ -28,5 +39,5 @@ EXPOSE 8765
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD .venv/bin/python -c "import requests; requests.get('http://localhost:8765')" || exit 1
 
-# Run server in HTTP mode
+# Default: run MCP server
 CMD [".venv/bin/python", "server.py", "--transport", "http", "--host", "0.0.0.0", "--port", "8765"]

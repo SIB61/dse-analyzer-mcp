@@ -3,12 +3,15 @@ version: '3.8'
 services:
   # DSE Analysis MCP Server
   dse-mcp:
-    build: .
+    image: ghcr.io/sib61/dse-analyst:main
     container_name: dse-mcp
     ports:
       - "8765:8765"
     environment:
       - PYTHONUNBUFFERED=1
+    volumes:
+      - dse-analyzer:/app/mcp-configs
+      - dse-analyzer-opencode:/root/.config/opencode
     restart: unless-stopped
     healthcheck:
       test: ["CMD", ".venv/bin/python", "-c", "import requests; requests.get('http://localhost:8765')"]
@@ -16,7 +19,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5s
-    # Resource limits
     deploy:
       resources:
         limits:
@@ -25,9 +27,12 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-    # Logging
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  dse-analyzer:
+  dse-analyzer-opencode:
