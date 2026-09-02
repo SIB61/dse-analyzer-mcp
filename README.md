@@ -14,33 +14,15 @@ An MCP (Model Context Protocol) server that provides **live Dhaka Stock Exchange
 
 ## Installation
 
-### Option 1: One-liner Install (Recommended)
-
-No clone required. Pulls the image, starts the server, and sets up a local workspace:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/SIB61/dse-analyzer-mcp/main/install.sh | bash
-```
-
-Then open your AI agent in the workspace:
-
-```bash
-cd ~/.dse-analyzer-mcp
-opencode
-```
-
-### Option 2: Docker (Manual)
+### Option 1: Docker (Recommended)
 
 ```bash
 docker pull ghcr.io/sib61/dse-analyzer-mcp:main
 
-docker run -d -p 8765:8765 \
-  -v ~/.dse-analyzer-mcp:/app/mcp-configs \
-  --name dse-analyzer-mcp \
-  ghcr.io/sib61/dse-analyzer-mcp:main
+docker run -d -p 8765:8765 --name dse-analyzer-mcp ghcr.io/sib61/dse-analyzer-mcp:main
 ```
 
-### Option 3: Docker Compose
+### Option 2: Docker Compose
 
 ```bash
 git clone https://github.com/SIB61/dse-analyzer-mcp.git
@@ -48,7 +30,7 @@ cd dse-analyzer-mcp
 docker compose up -d
 ```
 
-### Option 4: Local Setup (Python 3.12+)
+### Option 3: Local Setup (Python 3.12+)
 
 ```bash
 git clone https://github.com/SIB61/dse-analyzer-mcp.git
