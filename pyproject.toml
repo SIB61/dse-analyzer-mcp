@@ -1,0 +1,23 @@
+[project]
+name = "dse-analyst-mcp"
+version = "0.1.0"
+description = "DSE Analysis MCP Server — live Dhaka Stock Exchange data + technical analysis engine"
+readme = "README.md"
+authors = [
+    { name = "Md. Sabit Islam Bhuiya", email = "jbc.sabit.islam@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=1.0.0,<2.0.0",
+    "bdshare>=0.1.0",
+    "pandas>=1.5.0",
+    "numpy>=1.24.0",
+    "uvicorn>=0.27.0",
+]
+
+[project.scripts]
+dse-analyst-mcp = "server_http:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

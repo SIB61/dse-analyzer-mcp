@@ -8,14 +8,22 @@ A custom [Model Context Protocol](https://modelcontextprotocol.io) server that c
 
 ```
 dse-analyst-mcp/
-├── server.py               ← MCP server — registers all 16 tools
+├── server.py               ← MCP server (stdio mode — local clients)
+├── server_http.py          ← MCP server (HTTP mode — remote clients) ← NEW
 ├── dse_data.py             ← DSE data layer (bdshare wrapper)
 ├── technical_analysis.py   ← Indicators: RSI, MACD, BB, Ichimoku, Fib, etc.
 ├── requirements.txt        ← Python dependencies
 ├── .mcp.json               ← Claude Code MCP config (not committed — machine-specific paths)
-├── .venv/                  ← Python 3.11 virtual environment
-├── CLAUDE.md               ← Strategy reference (auto-loaded by Claude Code; adapt for other clients)
+├── .venv/                  ← Python 3.11/3.12 virtual environment
+├── CLAUDE.md               ← Strategy reference (auto-loaded by Claude Code)
 ├── GUIDE.md                ← User guide: queries, playbooks, indicator reference
+├── DEPLOYMENT.md           ← Deployment guide: HTTP server, systemd, Docker, Nginx ← NEW
+├── CLIENT_CONFIG.md        ← Client configuration examples (Claude, Cursor, Python, etc.) ← NEW
+├── dse-mcp.service         ← Systemd service template ← NEW
+├── nginx-dse-mcp.conf      ← Nginx reverse proxy config (SSL/TLS) ← NEW
+├── Dockerfile              ← Docker containerization ← NEW
+├── docker-compose.yml      ← Docker Compose for easy deployment ← NEW
+├── setup.sh                ← Quick setup script ← NEW
 └── README.md               ← This file
 ```
 
@@ -23,16 +31,25 @@ dse-analyst-mcp/
 
 ## Architecture
 
+### Local (Stdio) Mode
 ```
-You (any MCP client — Claude Code, Cursor, Windsurf, etc.)
-       │ natural language question
+You (local MCP client — Claude Code, Cursor, etc.)
+       │ command: spawn process
        ▼
-   AI model ──── reads client MCP config ───────────────┐
-       │                                                 │
-       │ picks tool                                      │
-       ▼                                                 ▼
-  server.py (FastMCP)                         client config registers
-  16 registered tools                         server.py on startup
+  server.py (FastMCP stdio)
+  16 registered tools
+       │
+       ├── DSE Data tools  → dse_data.py  → bdshare → DSE website
+       └── TA tools        → technical_analysis.py → pandas/numpy
+```
+
+### Remote (HTTP) Mode ← NEW
+```
+You (any client — Claude, Cursor, Python script, curl, etc.)
+       │ http://your-server:8000
+       ▼
+  server_http.py (FastMCP HTTP)  [on remote server]
+  16 registered tools
        │
        ├── DSE Data tools  → dse_data.py  → bdshare → DSE website
        └── TA tools        → technical_analysis.py → pandas/numpy
@@ -79,50 +96,41 @@ You (any MCP client — Claude Code, Cursor, Windsurf, etc.)
 
 ## Setup
 
-### First time (already done on this machine)
+### Local Development (Stdio Mode)
 
 ```bash
-# 1. Create virtual environment with Python 3.11
-python3.11 -m venv .venv
-
-# 2. Install dependencies
-.venv/bin/pip install mcp bdshare pandas numpy ta
-
-# 3. Verify
-.venv/bin/python3.11 -c "import server; print('OK')"
-
-# 4. Configure your MCP client (see below), then restart it
-```
-
-### Reinstall on a new machine
-
-```bash
-git clone <this repo>
+# 1. Clone and setup
+git clone <this-repo>
 cd dse-analyst-mcp
 python3.11 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-# Configure your MCP client and restart it
+
+# 2. Configure your MCP client to spawn the server locally
+# See CLIENT_CONFIG.md for your editor (Claude Code, Cursor, Windsurf, etc.)
 ```
 
-### MCP config
+### Remote Deployment (HTTP Mode) ← NEW
 
-The server uses **stdio transport** — your MCP client spawns `server.py` as a subprocess. Configure it with the absolute paths to your `.venv` and `server.py`.
-
-**Claude Code** — create `.mcp.json` in the project root (not committed; gitignored):
-```json
-{
-  "mcpServers": {
-    "dse-analysis": {
-      "command": "/path/to/.venv/bin/python3.11",
-      "args": ["/path/to/server.py"]
-    }
-  }
-}
+**Quick start** — Run HTTP server locally:
+```bash
+cd dse-analyst-mcp
+.venv/bin/python3 server_http.py --transport http --host 0.0.0.0 --port 8000
 ```
 
-**Cursor / Windsurf / Zed** — add an equivalent entry in your client's MCP settings file. The `command` and `args` values are identical; only the config file location differs per client.
+**Then configure your client to connect to:** `http://your-server-ip:8000`
 
-No internet connection is needed beyond what bdshare uses to scrape DSE.
+For production deployment with systemd, Docker, or Nginx + SSL, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+### Using Docker
+
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
+
+# Server will be available at http://localhost:8000
+```
+
+For full deployment guide, client config examples, and troubleshooting, see [DEPLOYMENT.md](DEPLOYMENT.md) and [CLIENT_CONFIG.md](CLIENT_CONFIG.md).
 
 ---
 
@@ -135,6 +143,7 @@ No internet connection is needed beyond what bdshare uses to scrape DSE.
 | `pandas` | 3.0.3 | DataFrame / OHLCV manipulation |
 | `numpy` | 2.4.6 | Numerical computing |
 | `ta` | 0.11.0 | Supplemental TA library |
+| `uvicorn` | 0.27.0 | ASGI server for HTTP mode |
 
 Runtime: **Python 3.11** (Homebrew). `pandas-ta` not used — all indicators are implemented natively in `technical_analysis.py`.
 
