@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/dse-analyst
+  IMAGE_NAME: ${{ github.repository_owner }}/dse-analyzer
 
 jobs:
   build-and-push:

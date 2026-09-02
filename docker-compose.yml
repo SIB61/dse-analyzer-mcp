@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # DSE Analysis MCP Server
   dse-mcp:
-    image: ghcr.io/sib61/dse-analyst:main
+    image: ghcr.io/sib61/dse-analyzer:main
     container_name: dse-mcp
     ports:
       - "8765:8765"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE="ghcr.io/sib61/dse-analyst:main"
+IMAGE="ghcr.io/sib61/dse-analyzer:main"
 CONTAINER="dse-mcp"
 VOLUME="dse-analyzer"
 
