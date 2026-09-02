@@ -25,7 +25,7 @@ curl -fsSL https://raw.githubusercontent.com/SIB61/dse-analyzer-mcp/main/install
 Then open opencode inside the container:
 
 ```bash
-docker exec -it dse-mcp opencode
+docker exec -it dse-analyzer-mcp opencode
 ```
 
 ### Option 2: Docker (Manual)
@@ -33,7 +33,7 @@ docker exec -it dse-mcp opencode
 ```bash
 docker pull ghcr.io/sib61/dse-analyzer-mcp:main
 
-docker run -d -p 8765:8765 --name dse-mcp ghcr.io/sib61/dse-analyzer-mcp:main
+docker run -d -p 8765:8765 --name dse-analyzer-mcp ghcr.io/sib61/dse-analyzer-mcp:main
 ```
 
 ### Option 3: Docker Compose

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 IMAGE="ghcr.io/sib61/dse-analyzer-mcp:main"
-CONTAINER="dse-mcp"
+CONTAINER="dse-analyzer-mcp"
 VOLUME="dse-analyzer-mcp"
 
 echo "==> Pulling $IMAGE ..."
