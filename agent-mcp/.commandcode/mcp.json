@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "DSE-ANALYZER": {
+      "command": "uv",
+      "args": [
+        "run",
+        "dse-analyst-mcp",
+        "--transport",
+        "stdio"
+      ],
+      "trust": true,
+      "alwaysAllow": [
+        "DSE-ANALYZER/*",
+        "DSE-ANALYZER/get_live_price",
+        "DSE-ANALYZER/get_historical_data",
+        "DSE-ANALYZER/get_market_summary",
+        "DSE-ANALYZER/get_top_gainers",
+        "DSE-ANALYZER/get_top_losers",
+        "DSE-ANALYZER/get_all_live_prices",
+        "DSE-ANALYZER/get_company_info",
+        "DSE-ANALYZER/analyze_trend",
+        "DSE-ANALYZER/analyze_momentum",
+        "DSE-ANALYZER/analyze_volatility",
+        "DSE-ANALYZER/analyze_volume",
+        "DSE-ANALYZER/get_fibonacci_levels",
+        "DSE-ANALYZER/get_ichimoku_cloud",
+        "DSE-ANALYZER/get_pivot_points",
+        "DSE-ANALYZER/full_analysis",
+        "DSE-ANALYZER/scan_top_stocks",
+        "DSE-ANALYZER/get_engulfing_pattern",
+        "DSE-ANALYZER/scan_engulfing_stocks"
+      ],
+      "autoApprove": true
+    }
+  }
+}

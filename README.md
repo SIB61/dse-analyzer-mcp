@@ -1,6 +1,6 @@
 # DSE Analyzer MCP Server
 
-An MCP (Model Context Protocol) server that provides **live Dhaka Stock Exchange (DSE) data** and a **comprehensive technical analysis engine**. Connect it to any MCP-compatible AI client or agent framework (Antigravity, OpenCode, Codex, Kiro, Claude Desktop, Cursor, Windsurf) to analyze DSE stocks with quantitative trading strategies.
+An MCP (Model Context Protocol) server that provides **live Dhaka Stock Exchange (DSE) data** and a **comprehensive technical analysis engine**. Connect it to any MCP-compatible AI client or agent framework (Antigravity, Command Code, OpenCode, Codex, Kiro, Claude Desktop, Cursor, Windsurf) to analyze DSE stocks with quantitative trading strategies.
 
 ---
 
@@ -26,7 +26,7 @@ git clone https://github.com/SIB61/dse-analyzer-mcp.git
 cd dse-analyzer-mcp
 
 # Run the automated setup script
-./agent/setup.sh
+./agent-mcp/setup.sh
 ```
 
 `setup.sh` will:
@@ -41,11 +41,11 @@ cd dse-analyzer-mcp
 
 For local AI clients that communicate over Standard I/O (Stdio), the server is executed via `uv run dse-analyst-mcp --transport stdio`.
 
-Pre-configured agent files are available in the [`agent/`](./agent) directory:
+Pre-configured agent files are available in the [`agent-mcp/`](./agent-mcp) directory:
 
 ### 1. Antigravity (`agy`)
-* **Workspace Config**: `.mcp.json` / `.agents/mcp_config.json`
-* **Agent Persona**: `.agents/agents/DSE-ANALYZER/agent.md`
+* **Workspace Config**: `.mcp.json` / `agent-mcp/.agents/mcp_config.json`
+* **Agent Persona**: `agent-mcp/.agents/agents/DSE-ANALYZER/agent.md`
 * **Configuration**:
   ```json
   {
@@ -60,9 +60,26 @@ Pre-configured agent files are available in the [`agent/`](./agent) directory:
   }
   ```
 
-### 2. OpenCode
-* **Configuration**: `agent/opencode.json`
-* **Agent Persona**: `agent/.opencode/agents/DSE-ANALYZER.md`
+### 2. Command Code
+* **Workspace Config**: `agent-mcp/commandcode.json` / `agent-mcp/.commandcode/mcp.json`
+* **Agent Persona**: `agent-mcp/.commandcode/agents/DSE-ANALYZER.md`
+* **Configuration**:
+  ```json
+  {
+    "mcpServers": {
+      "DSE-ANALYZER": {
+        "command": "uv",
+        "args": ["run", "dse-analyst-mcp", "--transport", "stdio"],
+        "trust": true,
+        "autoApprove": true
+      }
+    }
+  }
+  ```
+
+### 3. OpenCode
+* **Configuration**: `agent-mcp/opencode.json`
+* **Agent Persona**: `agent-mcp/.opencode/agents/DSE-ANALYZER.md`
 * **Configuration**:
   ```json
   {
@@ -77,9 +94,9 @@ Pre-configured agent files are available in the [`agent/`](./agent) directory:
   }
   ```
 
-### 3. Codex
-* **Configuration**: `agent/.codex/config.toml`
-* **Agent Persona**: `agent/.codex/agents/DSE-ANALYZER.toml`
+### 4. Codex
+* **Configuration**: `agent-mcp/.codex/config.toml`
+* **Agent Persona**: `agent-mcp/.codex/agents/DSE-ANALYZER.toml`
 * **Configuration**:
   ```toml
   [mcp_servers.DSE-ANALYZER]
@@ -87,9 +104,9 @@ Pre-configured agent files are available in the [`agent/`](./agent) directory:
   args = ["run", "dse-analyst-mcp", "--transport", "stdio"]
   ```
 
-### 4. Kiro
-* **Settings**: `agent/.kiro/settings/mcp.json`
-* **Agent Persona**: `agent/.kiro/agents/DSE-ANALYZER.json`
+### 5. Kiro
+* **Settings**: `agent-mcp/.kiro/settings/mcp.json`
+* **Agent Persona**: `agent-mcp/.kiro/agents/DSE-ANALYZER.json`
 * **Configuration**:
   ```json
   {
