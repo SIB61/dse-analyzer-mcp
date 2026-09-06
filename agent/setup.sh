@@ -13,9 +13,9 @@ echo ""
 
 # Step 1: Check Python 3 installation
 echo "[1/4] Checking Python environment..."
-if ! command -v python3 &> /dev/null; then
-    echo "ERROR: python3 is required but not found in PATH." >&2
-    exit 1
+if ! command -v python3 &>/dev/null; then
+  echo "ERROR: python3 is required but not found in PATH." >&2
+  exit 1
 fi
 PYTHON_VERSION=$(python3 --version 2>&1)
 echo "Found ${PYTHON_VERSION}"
@@ -23,14 +23,14 @@ echo "Found ${PYTHON_VERSION}"
 # Step 2: Check or install Astral uv
 echo ""
 echo "[2/4] Checking uv package manager..."
-if ! command -v uv &> /dev/null; then
-    echo "uv not found. Installing Astral uv package manager..."
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-    if ! command -v uv &> /dev/null; then
-        echo "ERROR: uv installation failed or binary not found in PATH." >&2
-        exit 1
-    fi
+if ! command -v uv &>/dev/null; then
+  echo "uv not found. Installing Astral uv package manager..."
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+  if ! command -v uv &>/dev/null; then
+    echo "ERROR: uv installation failed or binary not found in PATH." >&2
+    exit 1
+  fi
 fi
 UV_VERSION=$(uv --version 2>&1)
 echo "Found ${UV_VERSION}"
@@ -39,7 +39,7 @@ echo "Found ${UV_VERSION}"
 echo ""
 echo "[3/4] Installing project dependencies with uv..."
 cd "$PROJECT_ROOT"
-uv sync
+uv sync --python 3.12
 
 # Step 4: Verify server modules
 echo ""
