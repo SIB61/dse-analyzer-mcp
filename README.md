@@ -26,7 +26,7 @@ git clone https://github.com/SIB61/dse-analyzer-mcp.git
 cd dse-analyzer-mcp
 
 # Run the automated setup script
-./agent-mcp/setup.sh
+./agent/setup.sh
 ```
 
 `setup.sh` will:
@@ -41,7 +41,7 @@ cd dse-analyzer-mcp
 
 For local AI clients that communicate over Standard I/O (Stdio), the server is executed via `uv run dse-analyst-mcp --transport stdio`.
 
-Pre-configured agent files are available in the [`agent-mcp/`](./agent-mcp) directory:
+Pre-configured agent files are available in the [`agent/`](./agent) directory:
 
 ### 1. Antigravity (`agy`)
 * **Workspace Config**: `.mcp.json` / `.agents/mcp_config.json`
@@ -61,8 +61,8 @@ Pre-configured agent files are available in the [`agent-mcp/`](./agent-mcp) dire
   ```
 
 ### 2. OpenCode
-* **Configuration**: `agent-mcp/opencode.json`
-* **Agent Persona**: `agent-mcp/.opencode/agents/DSE-ANALYZER.md`
+* **Configuration**: `agent/opencode.json`
+* **Agent Persona**: `agent/.opencode/agents/DSE-ANALYZER.md`
 * **Configuration**:
   ```json
   {
@@ -78,8 +78,8 @@ Pre-configured agent files are available in the [`agent-mcp/`](./agent-mcp) dire
   ```
 
 ### 3. Codex
-* **Configuration**: `agent-mcp/.codex/config.toml`
-* **Agent Persona**: `agent-mcp/.codex/agents/DSE-ANALYZER.toml`
+* **Configuration**: `agent/.codex/config.toml`
+* **Agent Persona**: `agent/.codex/agents/DSE-ANALYZER.toml`
 * **Configuration**:
   ```toml
   [mcp_servers.DSE-ANALYZER]
@@ -88,8 +88,8 @@ Pre-configured agent files are available in the [`agent-mcp/`](./agent-mcp) dire
   ```
 
 ### 4. Kiro
-* **Settings**: `agent-mcp/.kiro/settings/mcp.json`
-* **Agent Persona**: `agent-mcp/.kiro/agents/DSE-ANALYZER.json`
+* **Settings**: `agent/.kiro/settings/mcp.json`
+* **Agent Persona**: `agent/.kiro/agents/DSE-ANALYZER.json`
 * **Configuration**:
   ```json
   {
